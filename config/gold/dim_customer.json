@@ -1,0 +1,10 @@
+{
+  "target": "gold.dim_customer",
+  "procedure": "gold.usp_load_dim_customer",
+  "load_type": "upsert",
+  "enabled": true,
+  "depends_on_silver": [
+    "customers_sql"
+  ],
+  "depends_on_gold": []
+}

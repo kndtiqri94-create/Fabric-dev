@@ -1,0 +1,59 @@
+{
+  "framework_version": "1.0",
+  "config_root": "/lakehouse/default/Files/config",
+  "layers": {
+    "bronze": {
+      "lakehouse": "lh_bronze"
+    },
+    "silver": {
+      "lakehouse": "lh_silver"
+    },
+    "gold": {
+      "warehouse": "wh_gold"
+    },
+    "metadata": {
+      "lakehouse": "lh_metadata",
+      "schema": "meta",
+      "note": "control tables + config files; attach as default lakehouse of orchestration notebooks"
+    }
+  },
+  "control": {
+    "watermark_table": "lh_metadata.meta.watermark",
+    "run_log_table": "lh_metadata.meta.run_log",
+    "dq_table": "lh_metadata.meta.dq_result"
+  },
+  "audit_columns": [
+    "_ingest_run_id",
+    "_ingested_at",
+    "_source_system"
+  ],
+  "maintenance": {
+    "vacuum_retain_hours": 168,
+    "lakehouses": [
+      "lh_bronze",
+      "lh_silver",
+      "lh_metadata"
+    ]
+  },
+  "alerts": {
+    "stale_after_hours": 24
+  },
+  "environments": {
+    "dev": {
+      "key_vault_uri_ref": "KV_URI_DEV"
+    },
+    "test": {
+      "key_vault_uri_ref": "KV_URI_TEST"
+    },
+    "prod": {
+      "key_vault_uri_ref": "KV_URI_PROD"
+    }
+  },
+  "layout": {
+    "connections": "connections/",
+    "sources": "sources/",
+    "bronze": "bronze/",
+    "silver": "silver/",
+    "gold": "gold/"
+  }
+}

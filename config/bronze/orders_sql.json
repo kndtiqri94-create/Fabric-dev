@@ -1,0 +1,7 @@
+{
+  "dataset_id": "orders_sql",
+  "table": "orders",
+  "write_mode": "append",
+  "partition_by": [],
+  "keep_raw_payload": false
+}

@@ -1,0 +1,7 @@
+{
+  "dataset_id": "products_api",
+  "table": "products",
+  "write_mode": "append",
+  "partition_by": [],
+  "keep_raw_payload": true
+}

@@ -1,0 +1,20 @@
+{
+  "dataset_id": "crm_contacts_api",
+  "table": "contacts",
+  "write_mode": "merge",
+  "business_key": [
+    "id"
+  ],
+  "dedupe_order_column": "_ingested_at",
+  "required_columns": {
+    "id": "string"
+  },
+  "dq": {
+    "not_null": [
+      "id"
+    ],
+    "unique": [
+      "id"
+    ]
+  }
+}

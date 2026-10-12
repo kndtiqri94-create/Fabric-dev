@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+.env
+.fabric/
+_live_nbs/
+# real (non-template) secrets/overrides must never be committed
+*.local.json

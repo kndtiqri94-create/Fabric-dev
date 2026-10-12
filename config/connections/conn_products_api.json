@@ -1,0 +1,7 @@
+{
+  "name": "conn_products_api",
+  "type": "RestApi",
+  "description": "Public sample API, no authentication.",
+  "base_url": "https://dummyjson.com",
+  "auth": "none"
+}

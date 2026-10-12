@@ -1,0 +1,10 @@
+{
+  "target": "gold.dim_product",
+  "procedure": "gold.usp_load_dim_product",
+  "load_type": "upsert",
+  "enabled": true,
+  "depends_on_silver": [
+    "products_api"
+  ],
+  "depends_on_gold": []
+}

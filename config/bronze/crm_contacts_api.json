@@ -1,0 +1,7 @@
+{
+  "dataset_id": "crm_contacts_api",
+  "table": "contacts",
+  "write_mode": "append",
+  "partition_by": [],
+  "keep_raw_payload": true
+}

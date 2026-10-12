@@ -1,0 +1,74 @@
+{
+  "_note": "SKELETON - verify against a pipeline exported from your workspace (Git format) before deploying. Item/connection ids are placeholders resolved at release time.",
+  "properties": {
+    "description": "Daily medallion load: source -> bronze -> silver -> gold. Owner: data-eng. Expected duration ~30 min.",
+    "parameters": {
+      "p_env": { "type": "string", "defaultValue": "dev" },
+      "p_source": { "type": "string" },
+      "p_source_type": { "type": "string", "defaultValue": "sql" },
+      "p_window_end": { "type": "string" }
+    },
+    "activities": [
+      {
+        "name": "Read source config",
+        "type": "Lookup",
+        "description": "List Files/config/sources/*.json (Get Metadata + ForEach, or a small notebook); keep enabled = true; pass dataset_id as p_source and source_type as p_source_type (sql | rest). Gold step then runs config/gold/* procedures in depends_on_gold order (dimensions before facts).",
+        "policy": { "retry": 1, "retryIntervalInSeconds": 30, "timeout": "0.00:05:00" }
+      },
+      {
+        "name": "Get watermark",
+        "dependsOn": [{ "activity": "Read source config", "dependencyConditions": ["Succeeded"] }],
+        "type": "TridentNotebook",
+        "description": "nb_metadata_ops(p_action=get_watermark, p_source) -> exit value .watermark (read via notebook, not the lakehouse SQL endpoint, which can lag behind Delta writes)",
+        "policy": { "retry": 2, "retryIntervalInSeconds": 30, "timeout": "0.00:10:00" }
+      },
+      {
+        "name": "Bronze - SQL copy",
+        "type": "Copy",
+        "description": "If p_source_type = sql: incremental query WHERE ModifiedDate > watermark AND <= p_window_end -> lh_bronze Delta table (append, + _ingest_run_id)",
+        "dependsOn": [{ "activity": "Get watermark", "dependencyConditions": ["Succeeded"] }],
+        "policy": { "retry": 2, "retryIntervalInSeconds": 60, "timeout": "0.02:00:00" }
+      },
+      {
+        "name": "Bronze - API notebook",
+        "type": "TridentNotebook",
+        "description": "If p_source_type = rest: nb_bronze_api_ingest(p_source, p_window_start=watermark, p_run_id=@pipeline().RunId)",
+        "dependsOn": [{ "activity": "Get watermark", "dependencyConditions": ["Succeeded"] }],
+        "policy": { "retry": 0, "timeout": "0.02:00:00" }
+      },
+      {
+        "name": "Silver - transform",
+        "type": "TridentNotebook",
+        "description": "nb_silver_transform(p_source, p_run_id) - MERGE on business key + DQ",
+        "dependsOn": [
+          { "activity": "Bronze - SQL copy", "dependencyConditions": ["Succeeded", "Skipped"] },
+          { "activity": "Bronze - API notebook", "dependencyConditions": ["Succeeded", "Skipped"] }
+        ],
+        "policy": { "retry": 0, "timeout": "0.02:00:00" }
+      },
+      {
+        "name": "Gold - load warehouse",
+        "type": "Script",
+        "description": "EXEC gold.usp_load_dim_customer; EXEC gold.usp_load_dim_product; EXEC gold.usp_load_fact_orders (Warehouse)",
+        "dependsOn": [{ "activity": "Silver - transform", "dependencyConditions": ["Succeeded"] }],
+        "policy": { "retry": 1, "retryIntervalInSeconds": 60, "timeout": "0.01:00:00" }
+      },
+      {
+        "name": "Commit watermark",
+        "type": "Script",
+        "description": "Runs ONLY after gold succeeded: nb_metadata_ops(commit_watermark, p_value=new_watermark; watermark never moves backwards) then log_run per layer and log_dq (writes lh_metadata.meta.*)",
+        "dependsOn": [{ "activity": "Gold - load warehouse", "dependencyConditions": ["Succeeded"] }],
+        "policy": { "retry": 1, "timeout": "0.00:10:00" }
+      },
+      {
+        "name": "Notify on failure",
+        "type": "Office365Outlook",
+        "description": "Email/Teams with @pipeline().RunId, pipeline name, p_source, error message. No row data.",
+        "dependsOn": [
+          { "activity": "Silver - transform", "dependencyConditions": ["Failed"] },
+          { "activity": "Gold - load warehouse", "dependencyConditions": ["Failed"] }
+        ]
+      }
+    ]
+  }
+}

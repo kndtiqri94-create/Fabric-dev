@@ -1,0 +1,24 @@
+{
+  "dataset_id": "products_api",
+  "table": "products",
+  "write_mode": "merge",
+  "business_key": [
+    "id"
+  ],
+  "dedupe_order_column": "_ingested_at",
+  "required_columns": {
+    "id": "int",
+    "title": "string",
+    "category": "string",
+    "price": "double"
+  },
+  "dq": {
+    "not_null": [
+      "id",
+      "title"
+    ],
+    "unique": [
+      "id"
+    ]
+  }
+}

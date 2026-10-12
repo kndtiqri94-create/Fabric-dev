@@ -1,0 +1,9 @@
+# fabric-cicd parameterization: names/refs only, real ids come from the target workspace.
+# Verify keys against the current fabric-cicd docs before first release.
+find_replace:
+  # Swap the dev default lakehouse/workspace GUIDs found in item definitions per environment.
+  # Fill in after first export from dev (grep the notebook META blocks for the dev ids).
+  - find_value: "<dev-workspace-guid>"
+    replace_value:
+      test: "$workspace.$id"
+      prod: "$workspace.$id"

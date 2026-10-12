@@ -1,0 +1,52 @@
+name: fabric-ci-cd
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -e .[dev] && pytest -q
+      - name: Secret / GUID scan
+        run: |
+          ! grep -rEn "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" --include=*.py --include=*.json --include=*.yml --exclude-dir=.git --exclude-dir=.github . \
+            || (echo "GUID found in repo" && exit 1)
+      - run: python -c "import json,glob;[json.load(open(f)) for f in glob.glob('pipelines/**/*.json',recursive=True)]"
+
+  deploy-test:
+    if: github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: test
+    env: &auth
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      FABRIC_WORKSPACE_ID_TEST: ${{ secrets.FABRIC_WORKSPACE_ID_TEST }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r scripts/requirements-deploy.txt
+      - run: python scripts/deploy.py --env test
+
+  deploy-prod:
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment: prod        # configure required reviewers = manual approval
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      FABRIC_WORKSPACE_ID_PROD: ${{ secrets.FABRIC_WORKSPACE_ID_PROD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r scripts/requirements-deploy.txt
+      - run: python scripts/deploy.py --env prod

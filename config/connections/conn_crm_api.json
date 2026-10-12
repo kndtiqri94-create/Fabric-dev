@@ -1,0 +1,8 @@
+{
+  "name": "conn_crm_api",
+  "type": "RestApi",
+  "description": "TEMPLATE bearer-token API (its source is disabled).",
+  "base_url": "https://crm.example.com/api",
+  "auth": "bearer",
+  "secret_name": "conn_crm_api-token"
+}

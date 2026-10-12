@@ -1,0 +1,12 @@
+{
+  "name": "conn_sales_azuresql",
+  "type": "AzureSqlDatabase",
+  "description": "Sales OLTP (Azure SQL / SQL MI). Create in Fabric with this exact name; values here are references only.",
+  "server_ref": "SALES_SQL_SERVER",
+  "database_ref": "SALES_SQL_DATABASE",
+  "auth": "service_principal",
+  "secret_names": {
+    "principal_id_secret": "sales-sql-principal-id",
+    "principal_key_secret": "sales-sql-principal-key"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "dataset_id": "products_api",
+  "source_type": "rest",
+  "enabled": true,
+  "connection": "conn_products_api",
+  "rest": {
+    "endpoint": "/products",
+    "load_mode": "full",
+    "pagination": {
+      "style": "offset",
+      "page_param": "skip",
+      "size_param": "limit",
+      "page_size": 30
+    },
+    "records_path": "products"
+  },
+  "additional_config": {
+    "note": "public sample API, no authentication"
+  }
+}

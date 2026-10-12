@@ -1,0 +1,7 @@
+{
+  "dataset_id": "customers_sql",
+  "table": "customers",
+  "write_mode": "append",
+  "partition_by": [],
+  "keep_raw_payload": false
+}

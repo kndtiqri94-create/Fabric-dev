@@ -1,0 +1,13 @@
+{
+  "dataset_id": "customers_sql",
+  "source_type": "sql",
+  "enabled": true,
+  "connection": "conn_sales_azuresql",
+  "sql": {
+    "table": "dbo.Customers",
+    "query": "SELECT CustomerID, Email, Country, ModifiedDate FROM dbo.Customers WHERE ModifiedDate > '{watermark}' AND ModifiedDate <= '{window_end}'",
+    "load_mode": "incremental",
+    "watermark_column": "ModifiedDate"
+  },
+  "additional_config": {}
+}

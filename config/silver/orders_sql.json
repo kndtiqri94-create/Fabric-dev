@@ -1,0 +1,25 @@
+{
+  "dataset_id": "orders_sql",
+  "table": "orders",
+  "write_mode": "merge",
+  "business_key": [
+    "OrderID"
+  ],
+  "dedupe_order_column": "_ingested_at",
+  "required_columns": {
+    "OrderID": "int",
+    "CustomerID": "int",
+    "OrderDate": "date",
+    "TotalAmount": "decimal(18,2)",
+    "ModifiedDate": "timestamp"
+  },
+  "dq": {
+    "not_null": [
+      "OrderID",
+      "CustomerID"
+    ],
+    "unique": [
+      "OrderID"
+    ]
+  }
+}

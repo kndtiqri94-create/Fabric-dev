@@ -1,0 +1,13 @@
+{
+  "dataset_id": "orders_sql",
+  "source_type": "sql",
+  "enabled": true,
+  "connection": "conn_sales_azuresql",
+  "sql": {
+    "table": "dbo.Orders",
+    "query": "SELECT OrderID, CustomerID, OrderDate, TotalAmount, ModifiedDate FROM dbo.Orders WHERE ModifiedDate > '{watermark}' AND ModifiedDate <= '{window_end}'",
+    "load_mode": "incremental",
+    "watermark_column": "ModifiedDate"
+  },
+  "additional_config": {}
+}

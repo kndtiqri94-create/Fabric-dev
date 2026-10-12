@@ -1,0 +1,12 @@
+{
+  "target": "gold.fact_orders",
+  "procedure": "gold.usp_load_fact_orders",
+  "load_type": "full_refresh",
+  "enabled": true,
+  "depends_on_silver": [
+    "orders_sql"
+  ],
+  "depends_on_gold": [
+    "dim_customer"
+  ]
+}
